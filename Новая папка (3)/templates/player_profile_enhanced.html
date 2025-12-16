@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | FACEIT Analyser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .player-profile {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .main-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .player-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .player-basic h1 {
+            font-size: 2.5rem;
+            margin: 0 0 15px 0;
+        }
+
+        .player-basic .info-line {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .player-basic .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: white;
+            color: #764ba2;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .profile-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h2 {
+            font-size: 1.5rem;
+            margin: 0 0 20px 0;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .elo-display {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .elo-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #764ba2;
+            margin: 10px 0;
+        }
+
+        .elo-label {
+            font-size: 1.2rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-label {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .ranking-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .recent-matches {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .match-result {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .win {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .loss {
+            background: #f44336;
+            color: white;
+        }
+
+        .unknown {
+            background: #9e9e9e;
+            color: white;
+        }
+
+        .detailed-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-name {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .win-rate-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .win-rate-fill {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 5px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #ff9800;
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .player-avatar {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto;
+            }
+
+            .player-basic h1 {
+                font-size: 2rem;
+            }
+
+            .player-basic .info-line {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .elo-value {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-profile">
+        <div class="header">
+            <a href="/" class="back-link">← На главную</a>
+            <h1 style="color: #333;">FACEIT ANALYZER</h1>
+        </div>
+
+        {% if player %}
+        <!-- Основная информация -->
+        <div class="main-info">
+            {% if player.avatar %}
+            <img src="{{ player.avatar }}" alt="{{ player.nickname }}" class="player-avatar">
+            {% else %}
+            <div class="player-avatar" style="background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem;">🎮</span>
+            </div>
+            {% endif %}
+
+            <div class="player-basic">
+                <h1>{{ player.nickname }}</h1>
+                <div class="info-line">
+                    <div class="info-item">
+                        <span>🏳️</span>
+                        <span>{{ player.country|upper if player.country else 'Не указана' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span>🆔</span>
+                        <span>{{ player.player_id }}</span>
+                    </div>
+                    {% if player.skill_level > 0 %}
+                    <div class="info-item">
+                        <span>⭐</span>
+                        <span>Уровень {{ player.skill_level }}</span>
+                        <span class="level-badge">Lvl {{ player.skill_level }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <a href="{{ player.faceit_url }}" target="_blank" class="profile-link">
+                    🔗 Открыть профиль на FACEIT
+                </a>
+            </div>
+        </div>
+
+        <!-- Сетка статистики -->
+        <div class="stats-grid">
+            <!-- Рейтинг ELO -->
+            <div class="stat-card">
+                <h2>Рейтинг ELO</h2>
+                <div class="elo-display">
+                    <div class="elo-value">{{ player.faceit_elo }}</div>
+                    <div class="elo-label">ELO Рейтинг</div>
+                </div>
+            </div>
+
+            <!-- Рейтинги -->
+            <div class="stat-card">
+                <h2>Рейтинг</h2>
+                <div class="ranking-list">
+                    <div class="ranking-item">
+                        <span class="ranking-label">Рейтинг регион</span>
+                        {% if player.region_rank > 0 %}
+                        <span class="ranking-value">#{{ player.region_rank }}</span>
+                        {% else %}
+                        <span class="ranking-value">#—</span>
+                        {% endif %}
+                    </div>
+                    <div class="ranking-item">
+                        <span class="ranking-label">Рейтинг страна</span>
+                        {% if player.country_rank > 0 %}
+                        <span class="ranking-value">#{{ player.country_rank }}</span>
+                        {% else %}
+                        <span class="ranking-value">#—</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Последние игры -->
+            <div class="stat-card">
+                <h2>Последние игры</h2>
+                <div class="recent-matches">
+                    {% for match in player.recent_matches %}
+                        {% if match == 'W' %}
+                        <div class="match-result win">W</div>
+                        {% elif match == 'L' %}
+                        <div class="match-result loss">L</div>
+                        {% else %}
+                        <div class="match-result unknown">—</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div style="text-align: center; color: #666; margin-top: 10px;">
+                    Последние {{ player.recent_matches|length }} игр
+                </div>
+            </div>
+        </div>
+
+        <!-- Детальная статистика -->
+        <div class="stat-card">
+            <h2>📈 Детальная статистика</h2>
+            <div class="detailed-stats">
+                <div class="stat-item">
+                    <span class="stat-name">Общее кол-во матчей:</span>
+                    <span class="stat-value">{{ player.total_matches }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">Победы / Поражения:</span>
+                    <span class="stat-value">{{ player.total_wins }} / {{ player.total_losses }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">Винрейт:</span>
+                    <span class="stat-value">{{ player.win_rate|float|round(1) }}%</span>
+                </div>
+                <div class="stat-item">
+                    <div>
+                        <span class="stat-name">Текущая серия побед:</span>
+                        <span class="stat-value">{{ player.current_win_streak }}</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">K/D Ratio:</span>
+                    <span class="stat-value">{{ player.kd_ratio|float|round(2) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">Среднее убийств:</span>
+                    <span class="stat-value">{{ player.average_kills|float|round(1) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">Среднее смертей:</span>
+                    <span class="stat-value">{{ player.average_deaths|float|round(1) }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-name">Хедшоты %:</span>
+                    <span class="stat-value">{{ player.average_hs_percent|float|round(1) }}%</span>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div style="text-align: center; padding: 50px;">
+            <h2>Игрок не найден</h2>
+            <p>Попробуйте вернуться на главную страницу и повторить поиск.</p>
+            <a href="/" class="back-link">← На главную</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
