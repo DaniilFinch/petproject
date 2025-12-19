@@ -6,6 +6,24 @@
     <title>{{ title }} | FACEIT Analyser</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        :root {
+            --faceit-black: #141616;
+            --faceit-orange: #FF5500;
+            --faceit-orange-hover: #e64d00;
+            --faceit-light: #F5F8FA;
+            --faceit-text-light: #EBEFF3;
+            --faceit-text-dark: #141616;
+            --faceit-gray: #5B6770;
+            --faceit-border: #DDE3E7;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--faceit-text-dark);
+            margin: 0;
+            padding: 0;
+        }
+
         .player-profile {
             max-width: 1400px;
             margin: 0 auto;
@@ -18,18 +36,26 @@
             align-items: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 3px solid var(--faceit-orange);
         }
 
         .back-link {
-            color: #667eea;
+            color: var(--faceit-orange);
             text-decoration: none;
             font-weight: bold;
             font-size: 1.1rem;
+            transition: color 0.3s;
         }
 
         .back-link:hover {
-            text-decoration: underline;
+            color: var(--faceit-orange-hover);
+            text-decoration: none;
+        }
+
+        .header h1 {
+            color: var(--faceit-black);
+            font-weight: bold;
+            margin: 0;
         }
 
         .main-info {
@@ -37,23 +63,27 @@
             grid-template-columns: auto 1fr;
             gap: 30px;
             margin-bottom: 40px;
-            padding: 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            background: linear-gradient(135deg, var(--faceit-black) 0%, #2a2c2c 100%);
             border-radius: 15px;
-            color: white;
+            color: var(--faceit-text-light);
+            border: 3px solid var(--faceit-orange);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .player-avatar {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            border: 4px solid white;
+            border: 4px solid var(--faceit-orange);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background-color: var(--faceit-light);
         }
 
         .player-basic h1 {
             font-size: 2.5rem;
             margin: 0 0 15px 0;
+            color: var(--faceit-text-light);
         }
 
         .player-basic .info-line {
@@ -72,18 +102,22 @@
         .profile-link {
             display: inline-block;
             margin-top: 15px;
-            padding: 10px 25px;
-            background: white;
-            color: #764ba2;
+            padding: 12px 25px;
+            background: var(--faceit-orange);
+            color: white;
             text-decoration: none;
-            border-radius: 25px;
+            border-radius: 8px;
             font-weight: bold;
             transition: all 0.3s;
+            border: none;
         }
 
         .profile-link:hover {
+            background: var(--faceit-orange-hover);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(255, 85, 0, 0.3);
+            color: white;
+            text-decoration: none;
         }
 
         .stats-grid {
@@ -94,18 +128,25 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--faceit-light);
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 2px solid var(--faceit-border);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         .stat-card h2 {
             font-size: 1.5rem;
             margin: 0 0 20px 0;
-            color: #333;
+            color: var(--faceit-black);
             padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 3px solid var(--faceit-orange);
         }
 
         .elo-display {
@@ -116,15 +157,17 @@
         .elo-value {
             font-size: 4rem;
             font-weight: bold;
-            color: #764ba2;
+            color: var(--faceit-orange);
             margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .elo-label {
             font-size: 1.2rem;
-            color: #666;
+            color: var(--faceit-gray);
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-weight: 600;
         }
 
         .ranking-item {
@@ -132,7 +175,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--faceit-border);
         }
 
         .ranking-item:last-child {
@@ -141,13 +184,13 @@
 
         .ranking-label {
             font-size: 1.1rem;
-            color: #555;
+            color: var(--faceit-gray);
         }
 
         .ranking-value {
             font-size: 1.5rem;
             font-weight: bold;
-            color: #333;
+            color: var(--faceit-orange);
         }
 
         .recent-matches {
@@ -166,20 +209,25 @@
             justify-content: center;
             font-weight: bold;
             font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .match-result:hover {
+            transform: scale(1.1);
         }
 
         .win {
-            background: #4CAF50;
+            background: #28a745;
             color: white;
         }
 
         .loss {
-            background: #f44336;
+            background: #dc3545;
             color: white;
         }
 
         .unknown {
-            background: #9e9e9e;
+            background: var(--faceit-gray);
             color: white;
         }
 
@@ -194,7 +242,7 @@
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
-            border-bottom: 1px dashed #eee;
+            border-bottom: 1px solid var(--faceit-border);
         }
 
         .stat-item:last-child {
@@ -202,33 +250,19 @@
         }
 
         .stat-name {
-            color: #666;
+            color: var(--faceit-gray);
+            font-weight: 500;
         }
 
         .stat-value {
             font-weight: bold;
-            color: #333;
-        }
-
-        .win-rate-bar {
-            width: 100%;
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 5px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-
-        .win-rate-fill {
-            height: 100%;
-            background: #4CAF50;
-            border-radius: 5px;
+            color: var(--faceit-orange);
         }
 
         .level-badge {
             display: inline-block;
             padding: 5px 15px;
-            background: #ff9800;
+            background: var(--faceit-orange);
             color: white;
             border-radius: 20px;
             font-weight: bold;
@@ -239,6 +273,7 @@
             .main-info {
                 grid-template-columns: 1fr;
                 text-align: center;
+                padding: 20px;
             }
 
             .player-avatar {
@@ -270,7 +305,7 @@
     <div class="player-profile">
         <div class="header">
             <a href="/" class="back-link">← На главную</a>
-            <h1 style="color: #333;">FACEIT ANALYZER</h1>
+            <h1>FACEIT ANALYZER</h1>
         </div>
 
         {% if player %}
@@ -279,8 +314,8 @@
             {% if player.avatar %}
             <img src="{{ player.avatar }}" alt="{{ player.nickname }}" class="player-avatar">
             {% else %}
-            <div class="player-avatar" style="background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 3rem;">🎮</span>
+            <div class="player-avatar" style="display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 3rem; color: var(--faceit-orange);">🎮</span>
             </div>
             {% endif %}
 
@@ -357,7 +392,7 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                <div style="text-align: center; color: #666; margin-top: 10px;">
+                <div style="text-align: center; color: var(--faceit-gray); margin-top: 10px; font-weight: 500;">
                     Последние {{ player.recent_matches|length }} игр
                 </div>
             </div>
@@ -405,9 +440,9 @@
         </div>
 
         {% else %}
-        <div style="text-align: center; padding: 50px;">
-            <h2>Игрок не найден</h2>
-            <p>Попробуйте вернуться на главную страницу и повторить поиск.</p>
+        <div style="text-align: center; padding: 50px; background: var(--faceit-light); border-radius: 15px; border: 2px solid var(--faceit-border);">
+            <h2 style="color: var(--faceit-orange);">Игрок не найден</h2>
+            <p style="color: var(--faceit-gray);">Попробуйте вернуться на главную страницу и повторить поиск.</p>
             <a href="/" class="back-link">← На главную</a>
         </div>
         {% endif %}

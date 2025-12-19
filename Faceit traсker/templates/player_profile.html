@@ -6,6 +6,54 @@
     <title>{{ title }} | FACEIT Analyser</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+        :root {
+            --faceit-black: #141616;
+            --faceit-orange: #FF5500;
+            --faceit-orange-hover: #e64d00;
+            --faceit-light: #F5F8FA;
+            --faceit-text-light: #EBEFF3;
+            --faceit-text-dark: #141616;
+            --faceit-gray: #5B6770;
+            --faceit-border: #DDE3E7;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--faceit-text-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--faceit-orange);
+        }
+
+        header h1 {
+            color: var(--faceit-black);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: var(--faceit-orange);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            color: var(--faceit-orange-hover);
+            text-decoration: none;
+        }
+
         .player-profile {
             max-width: 1200px;
             margin: 0 auto;
@@ -17,62 +65,71 @@
             align-items: center;
             gap: 30px;
             margin-bottom: 40px;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            background: linear-gradient(135deg, var(--faceit-black) 0%, #2a2c2c 100%);
             border-radius: 15px;
-            color: white;
+            color: var(--faceit-text-light);
+            border: 3px solid var(--faceit-orange);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .player-avatar {
             width: 150px;
             height: 150px;
             border-radius: 50%;
-            border: 4px solid white;
+            border: 4px solid var(--faceit-orange);
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background-color: var(--faceit-light);
         }
 
         .player-info h2 {
             font-size: 2.5rem;
-            margin: 0 0 10px 0;
-            color: white;
+            margin: 0 0 15px 0;
+            color: var(--faceit-text-light);
         }
 
         .player-info p {
             font-size: 1.1rem;
-            margin: 8px 0;
+            margin: 10px 0;
             opacity: 0.9;
         }
 
         .player-info a {
             display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: white;
-            color: #764ba2;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: var(--faceit-orange);
+            color: white;
             text-decoration: none;
-            border-radius: 25px;
+            border-radius: 8px;
             font-weight: bold;
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            border: none;
         }
 
         .player-info a:hover {
+            background: var(--faceit-orange-hover);
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(255, 85, 0, 0.3);
+            color: white;
+            text-decoration: none;
         }
 
         .stats-section {
-            background: white;
+            background: var(--faceit-light);
             border-radius: 15px;
             padding: 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 2px solid var(--faceit-border);
+            margin-bottom: 30px;
         }
 
         .stats-section h3 {
             font-size: 1.8rem;
             margin: 0 0 30px 0;
-            color: #333;
-            border-bottom: 2px solid #764ba2;
-            padding-bottom: 10px;
+            color: var(--faceit-black);
+            border-bottom: 3px solid var(--faceit-orange);
+            padding-bottom: 15px;
         }
 
         .stats-grid {
@@ -82,57 +139,72 @@
         }
 
         .stat-card {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
             text-align: center;
-            border-left: 4px solid #764ba2;
-            transition: transform 0.3s;
+            border-top: 5px solid var(--faceit-orange);
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-left: none;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(255, 85, 0, 0.15);
+            border-top: 5px solid var(--faceit-orange-hover);
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
-            color: #764ba2;
+            color: var(--faceit-orange);
             margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
         }
 
         .stat-label {
-            font-size: 1rem;
-            color: #666;
+            font-size: 1.1rem;
+            color: var(--faceit-gray);
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .additional-info {
             margin-top: 40px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 25px;
         }
 
         .info-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            background: var(--faceit-light);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 2px solid var(--faceit-border);
+            transition: transform 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
         }
 
         .info-card h4 {
-            color: #764ba2;
-            margin-bottom: 15px;
+            color: var(--faceit-black);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--faceit-orange);
+            padding-bottom: 10px;
         }
 
         .info-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--faceit-border);
         }
 
         .info-item:last-child {
@@ -141,31 +213,39 @@
 
         .info-label {
             font-weight: 500;
-            color: #555;
+            color: var(--faceit-gray);
         }
 
         .info-value {
-            color: #333;
+            color: var(--faceit-black);
             font-weight: bold;
         }
 
-        .back-link {
-            display: inline-block;
+        .error-message {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--faceit-light);
+            border-radius: 15px;
+            border: 2px solid var(--faceit-border);
+        }
+
+        .error-message h2 {
+            color: var(--faceit-orange);
             margin-bottom: 20px;
-            color: #764ba2;
-            text-decoration: none;
-            font-weight: bold;
         }
 
-        .back-link:hover {
-            text-decoration: underline;
+        .error-message p {
+            color: var(--faceit-gray);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
         }
 
         @media (max-width: 768px) {
             .player-header {
                 flex-direction: column;
                 text-align: center;
-                gap: 20px;
+                gap: 25px;
+                padding: 20px;
             }
 
             .player-avatar {
@@ -175,6 +255,14 @@
 
             .player-info h2 {
                 font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .additional-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -192,8 +280,8 @@
                 {% if player.avatar %}
                 <img src="{{ player.avatar }}" alt="{{ player.nickname }}" class="player-avatar">
                 {% else %}
-                <div class="player-avatar" style="background: #ccc; display: flex; align-items: center; justify-content: center;">
-                    <span style="font-size: 3rem;">🎮</span>
+                <div class="player-avatar" style="display: flex; align-items: center; justify-content: center; background: var(--faceit-light);">
+                    <span style="font-size: 3rem; color: var(--faceit-orange);">🎮</span>
                 </div>
                 {% endif %}
                 <div class="player-info">
@@ -255,7 +343,7 @@
                     {% if player.verified %}
                     <div class="info-item">
                         <span class="info-label">Верификация:</span>
-                        <span class="info-value" style="color: green;">✅ Верифицирован</span>
+                        <span class="info-value" style="color: #28a745;">✅ Верифицирован</span>
                     </div>
                     {% endif %}
                 </div>
@@ -269,9 +357,9 @@
                     <div class="info-item">
                         <span class="info-label">Текущий ELO:</span>
                         {% if player.faceit_elo %}
-                        <span class="info-value" style="color: #764ba2; font-weight: bold;">{{ player.faceit_elo }}</span>
+                        <span class="info-value" style="color: var(--faceit-orange); font-weight: bold;">{{ player.faceit_elo }}</span>
                         {% elif player.games and player.games.cs2 and player.games.cs2.faceit_elo %}
-                        <span class="info-value" style="color: #764ba2; font-weight: bold;">{{ player.games.cs2.faceit_elo }}</span>
+                        <span class="info-value" style="color: var(--faceit-orange); font-weight: bold;">{{ player.games.cs2.faceit_elo }}</span>
                         {% else %}
                         <span class="info-value">Не доступно</span>
                         {% endif %}
