@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FACEIT Tracker - CS2 Статистика</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-crosshairs"></i> FACEIT TRACKER</h1>
+            <p>Статистика последних 30 матчей CS2 • Faceit + Steam профили</p>
+        </header>
+
+        <!-- Search Box -->
+        <div class="search-box">
+            <input type="text" id="playerInput" placeholder="Введите никнейм Faceit, ссылку на Faceit или Steam профиль...">
+            <button id="searchBtn"><i class="fas fa-search"></i> НАЙТИ ИГРОКА</button>
+        </div>
+
+        <!-- Quick Examples -->
+        <div class="examples" style="margin-bottom: 30px; text-align: center;">
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                <button class="example-btn" data-example="Akkaman1"><i class="fab fa-faceit"></i> Akkaman1</button>
+                <button class="example-btn" data-example="NiKo"><i class="fab fa-faceit"></i> NiKo</button>
+                <button class="example-btn" data-example="donk666"><i class="fab fa-faceit"></i> donk666</button>
+                <button class="example-btn" data-example="https://steamcommunity.com/id/officials1mple/"><i class="fab fa-steam"></i> Steam ID</button>
+                <button class="example-btn" data-example="https://www.faceit.com/ru/players/Akkaman1"><i class="fas fa-link"></i> Faceit URL</button>
+            </div>
+            <p style="color: #8e8e93; font-size: 0.9rem; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> Показывает статистику на Faceit
+            </p>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p id="loadingText">Ищем игрока...</p>
+        </div>
+
+        <!-- Error -->
+        <div class="error" id="error" style="display: none;"></div>
+
+        <!-- Stats Container -->
+        <div class="stats-container" id="statsContainer" style="display: none;">
+            <!-- Player Header -->
+            <div class="player-header">
+                <div class="player-avatar">
+                    <img id="playerAvatar" src="" alt="Аватар">
+                    <div id="steamAvatar" style="position: absolute; bottom: -10px; right: -10px; width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--faceit-orange); background: var(--faceit-dark); display: none;">
+                        <img id="steamAvatarImg" src="" alt="Steam" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    </div>
+                </div>
+                <div class="player-info">
+                    <h2 id="playerNickname"></h2>
+                    <div class="player-details">
+                        <span><i class="fas fa-globe"></i> <span id="playerCountry">Не указано</span></span>
+                        <span><i class="fas fa-chart-line"></i> Уровень: <strong id="playerLevel">-</strong></span>
+                        <span><i class="fas fa-trophy"></i> ELO: <strong id="playerElo">-</strong></span>
+                        <span><i class="fas fa-gamepad"></i> Всего матчей: <strong id="totalAllMatches">0</strong></span>
+                    </div>
+
+                    <!-- Profile Links -->
+                    <div class="profile-links" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <!-- Faceit Link -->
+                        <a id="faceitLink" href="#" target="_blank" class="profile-link faceit-link">
+                            <i class="fab fa-faceit"></i>
+                            <span>Faceit Профиль</span>
+                        </a>
+
+                        <!-- Steam Link -->
+                        <a id="steamLink" href="#" target="_blank" class="profile-link steam-link" style="display: none;">
+                            <i class="fab fa-steam"></i>
+                            <span>Steam Профиль</span>
+                        </a>
+
+                        <!-- Steam Status -->
+                        <div id="steamStatus" class="steam-status" style="display: none;">
+                            <div class="status-indicator" id="steamStatusIndicator"></div>
+                            <span id="steamStatusText"></span>
+                        </div>
+                    </div>
+
+                    <!-- Platform Badges -->
+                    <div class="platform-badges" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        <span class="platform-badge faceit-badge">
+                            <i class="fab fa-faceit"></i> FACEIT
+                        </span>
+                        <span id="steamBadge" class="platform-badge steam-badge" style="display: none;">
+                            <i class="fab fa-steam"></i> STEAM
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Stats -->
+            <div class="recent-stats">
+                <h3><i class="fas fa-history"></i> СТАТИСТИКА ПОСЛЕДНИХ МАТЧЕЙ</h3>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalMatches">0</div>
+                        <div class="stat-label">МАТЧЕЙ (30)</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="wins">0</div>
+                        <div class="stat-label">ПОБЕД</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="winRate">0%</div>
+                        <div class="stat-label">ПРОЦЕНТ ПОБЕД</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="kdRatio">0.00</div>
+                        <div class="stat-label">K/D RATIO</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgKills">0.0</div>
+                        <div class="stat-label">СРЕДНИЕ УБИЙСТВА</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgDeaths">0.0</div>
+                        <div class="stat-label">СРЕДНИЕ СМЕРТИ</div>
+                    </div>
+                </div>
+
+                <div class="kda-breakdown">
+                    <h4><i class="fas fa-chart-bar"></i> K/D/A ЗА ПОСЛЕДНИЕ МАТЧИ</h4>
+                    <div class="kda-values">
+                        <span><i class="fas fa-skull"></i> УБИЙСТВ: <strong id="totalKills">0</strong></span>
+                        <span><i class="fas fa-cross"></i> СМЕРТЕЙ: <strong id="totalDeaths">0</strong></span>
+                        <span><i class="fas fa-handshake"></i> АССИСТОВ: <strong id="totalAssists">0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Matches Section -->
+            <div class="matches-section">
+                <h3><i class="fas fa-list-ol"></i> ДЕТАЛИ ПОСЛЕДНИХ МАТЧЕЙ</h3>
+                <div class="matches-table-container">
+                    <table class="matches-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> МАТЧ ID</th>
+                                <th><i class="fas fa-map"></i> КАРТА</th>
+                                <th><i class="fas fa-skull"></i> K</th>
+                                <th><i class="fas fa-cross"></i> D</th>
+                                <th><i class="fas fa-handshake"></i> A</th>
+                                <th><i class="fas fa-flag"></i> РЕЗУЛЬТАТ</th>
+                                <th><i class="fas fa-calendar"></i> ДАТА</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matchesTableBody">
+                            <!-- Данные будут здесь -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>FACEIT TRACKER &copy; 2025 • Faceit статистика + Steam профили</p>
+            <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; font-size: 0.8rem;">
+                <span style="display: flex; align-items: center; gap: 5px;">
+                    <i class="fab fa-faceit" style="color: #ff5500;"></i>
+                    <span>Faceit API</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 5px;">
+                    <i class="fab fa-steam" style="color: #1b2838;"></i>
+                    <span>Steam API</span>
+                </span>
+                <span style="display: flex; align-items: center; gap: 5px;">
+                    <i class="fas fa-chart-bar" style="color: #34c759;"></i>
+                    <span>CS2 Статистика</span>
+                </span>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentSearchInput = '';
+
+        document.getElementById('searchBtn').addEventListener('click', searchPlayer);
+        document.getElementById('playerInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchPlayer();
+        });
+
+        // Обработчики для примеров
+        document.querySelectorAll('.example-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const example = this.getAttribute('data-example');
+                document.getElementById('playerInput').value = example;
+                searchPlayer();
+            });
+        });
+
+        async function searchPlayer() {
+            const input = document.getElementById('playerInput').value.trim();
+            if (!input) {
+                showError('Введите никнейм, ссылку на Faceit или Steam профиль');
+                return;
+            }
+
+            currentSearchInput = input;
+            updateLoadingText('Ищем игрока на Faceit...');
+            showLoading(true);
+            hideError();
+            hideStats();
+
+            try {
+                const response = await fetch('/get_stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input: input })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Не удалось найти игрока');
+                }
+
+                console.log("Данные получены:", data);
+                displayStats(data);
+            } catch (error) {
+                showError(error.message);
+                console.error("Ошибка:", error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayStats(data) {
+            console.log("Отображение статистики:", data);
+
+            // Основная информация игрока
+            const nickname = data.nickname;
+            document.getElementById('playerNickname').textContent = nickname;
+            document.getElementById('playerAvatar').src = data.player_info.avatar || 'https://via.placeholder.com/120/1c1c1e/ff5500?text=FACEIT';
+            document.getElementById('playerCountry').textContent = data.player_info.country || 'Не указано';
+            document.getElementById('playerLevel').textContent = data.player_info.skill_level;
+            document.getElementById('playerElo').textContent = data.player_info.faceit_elo;
+            document.getElementById('totalAllMatches').textContent = data.player_info.total_matches || 0;
+
+            // Ссылка на Faceit профиль
+            const faceitLink = document.getElementById('faceitLink');
+            faceitLink.href = `https://faceit.com/ru/players/${nickname}`;
+
+            // Steam информация
+            if (data.steam_info) {
+                displaySteamInfo(data.steam_info);
+            } else {
+                hideSteamInfo();
+            }
+
+            // Статистика последних матчей
+            if (data.recent_stats) {
+                const stats = data.recent_stats;
+
+                document.getElementById('totalMatches').textContent = stats.total_matches || 0;
+                document.getElementById('wins').textContent = stats.wins || 0;
+                document.getElementById('winRate').textContent = (stats.win_rate || 0) + '%';
+                document.getElementById('kdRatio').textContent = (stats.kd_ratio || 0).toFixed(2);
+                document.getElementById('avgKills').textContent = (stats.avg_kills || 0).toFixed(1);
+                document.getElementById('avgDeaths').textContent = (stats.avg_deaths || 0).toFixed(1);
+                document.getElementById('totalKills').textContent = stats.total_kills || 0;
+                document.getElementById('totalDeaths').textContent = stats.total_deaths || 0;
+                document.getElementById('totalAssists').textContent = stats.total_assists || 0;
+            }
+
+            // Таблица матчей
+            const matchesBody = document.getElementById('matchesTableBody');
+            matchesBody.innerHTML = '';
+
+            if (data.matches && data.matches.length > 0) {
+                console.log(`Загружено ${data.matches.length} матчей`);
+
+                data.matches.forEach((match, index) => {
+                    const matchId = match.match_id || `match-${index}`;
+                    const map = match.map || 'Unknown';
+                    const kills = match.kills || 0;
+                    const deaths = match.deaths || 0;
+                    const assists = match.assists || 0;
+                    const result = match.result || 'loss';
+
+                    // Форматируем дату
+                    let date = 'N/A';
+                    if (match.date) {
+                        try {
+                            const dateObj = new Date(match.date);
+                            date = dateObj.toLocaleDateString('ru-RU', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        } catch (e) {
+                            date = 'N/A';
+                        }
+                    }
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${matchId.length > 8 ? matchId.substring(0, 8) + '...' : matchId}</td>
+                        <td><strong>${map.toUpperCase()}</strong></td>
+                        <td class="${kills >= 20 ? 'highlight-kills' : ''}">${kills}</td>
+                        <td>${deaths}</td>
+                        <td>${assists}</td>
+                        <td><span class="result-badge ${result === 'win' ? 'win' : 'loss'}">
+                            ${result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ'}
+                        </span></td>
+                        <td>${date}</td>
+                    `;
+                    matchesBody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="7" class="no-data">Нет данных о последних матчах</td>`;
+                matchesBody.appendChild(row);
+            }
+
+            // Показываем статистику
+            document.getElementById('statsContainer').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('statsContainer').style.opacity = '1';
+                document.getElementById('statsContainer').style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function displaySteamInfo(steamInfo) {
+            console.log("Отображение Steam информации:", steamInfo);
+
+            // Ссылка на Steam профиль
+            const steamLink = document.getElementById('steamLink');
+            if (steamInfo.profileurl) {
+                steamLink.href = steamInfo.profileurl;
+                steamLink.style.display = 'flex';
+
+                // Устанавливаем текст ссылки
+                let linkText = 'Steam Профиль';
+                if (steamInfo.personaname) {
+                    linkText = steamInfo.personaname;
+                }
+                steamLink.querySelector('span').textContent = linkText;
+            }
+
+            // Steam аватар
+            const steamAvatar = document.getElementById('steamAvatar');
+            const steamAvatarImg = document.getElementById('steamAvatarImg');
+            if (steamInfo.avatarfull || steamInfo.avatarmedium || steamInfo.avatar) {
+                steamAvatarImg.src = steamInfo.avatarfull || steamInfo.avatarmedium || steamInfo.avatar;
+                steamAvatar.style.display = 'block';
+            }
+
+            // Steam бейдж
+            document.getElementById('steamBadge').style.display = 'flex';
+
+            // Steam статус
+            const steamStatus = document.getElementById('steamStatus');
+            const statusIndicator = document.getElementById('steamStatusIndicator');
+            const statusText = document.getElementById('steamStatusText');
+
+            if (steamInfo.personastate !== undefined) {
+                steamStatus.style.display = 'flex';
+
+                switch(steamInfo.personastate) {
+                    case 0:
+                        statusIndicator.style.background = '#8e8e93';
+                        statusText.textContent = 'Офлайн';
+                        break;
+                    case 1:
+                        statusIndicator.style.background = '#34c759';
+                        statusText.textContent = 'В сети';
+                        break;
+                    case 2:
+                        statusIndicator.style.background = '#ff9500';
+                        statusText.textContent = 'Занят';
+                        break;
+                    case 3:
+                        statusIndicator.style.background = '#ff3b30';
+                        statusText.textContent = 'Не беспокоить';
+                        break;
+                    case 4:
+                        statusIndicator.style.background = '#5856d6';
+                        statusText.textContent = 'Отошёл';
+                        break;
+                    case 5:
+                        statusIndicator.style.background = '#007aff';
+                        statusText.textContent = 'Ищет игру';
+                        break;
+                    case 6:
+                        statusIndicator.style.background = '#af52de';
+                        statusText.textContent = 'В игре';
+                        break;
+                    default:
+                        statusIndicator.style.background = '#8e8e93';
+                        statusText.textContent = 'Неизвестно';
+                }
+            }
+        }
+
+        function hideSteamInfo() {
+            document.getElementById('steamLink').style.display = 'none';
+            document.getElementById('steamAvatar').style.display = 'none';
+            document.getElementById('steamBadge').style.display = 'none';
+            document.getElementById('steamStatus').style.display = 'none';
+        }
+
+        function updateLoadingText(text) {
+            document.getElementById('loadingText').textContent = text;
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = message.replace(/\n/g, '<br>');
+            errorDiv.style.display = 'block';
+
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 8000);
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function hideStats() {
+            document.getElementById('statsContainer').style.display = 'none';
+        }
+
+        // Автозаполнение для тестирования
+        document.addEventListener('DOMContentLoaded', function() {
+            const tips = [
+                'Попробуйте: Akkaman1 (Faceit + Steam профиль)',
+                'Или: https://steamcommunity.com/id/officials1mple',
+                'Или: https://www.faceit.com/ru/players/Akkaman1',
+                'Или: NiKo (про-игрок с Steam)'
+            ];
+
+            let tipIndex = 0;
+            const input = document.getElementById('playerInput');
+
+            function rotateTip() {
+                input.placeholder = tips[tipIndex];
+                tipIndex = (tipIndex + 1) % tips.length;
+            }
+
+            rotateTip();
+            setInterval(rotateTip, 3000);
+
+            // Фокус на поле ввода
+            input.focus();
+        });
+    </script>
+
+    <style>
+        .example-btn {
+            background: var(--faceit-dark);
+            border: 1px solid var(--faceit-light);
+            color: var(--faceit-text);
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .example-btn:hover {
+            background: var(--faceit-darker);
+            border-color: var(--faceit-orange);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 85, 0, 0.2);
+        }
+
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .faceit-link {
+            background: linear-gradient(135deg, #ff5500, #ff7733);
+            color: white;
+        }
+
+        .faceit-link:hover {
+            background: linear-gradient(135deg, #ff7733, #ff5500);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 85, 0, 0.3);
+        }
+
+        .steam-link {
+            background: linear-gradient(135deg, #1b2838, #2a475e);
+            color: white;
+            border: 1px solid #66c0f4;
+        }
+
+        .steam-link:hover {
+            background: linear-gradient(135deg, #2a475e, #1b2838);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 192, 244, 0.3);
+        }
+
+        .platform-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .faceit-badge {
+            background: rgba(255, 85, 0, 0.1);
+            color: var(--faceit-orange);
+            border: 1px solid var(--faceit-orange);
+        }
+
+        .steam-badge {
+            background: rgba(27, 40, 56, 0.1);
+            color: #1b2838;
+            border: 1px solid #66c0f4;
+        }
+
+        .steam-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--faceit-darker);
+            border-radius: 20px;
+            border: 1px solid var(--faceit-light);
+            font-size: 0.85rem;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #8e8e93;
+        }
+
+        .player-avatar {
+            position: relative;
+        }
+
+        #steamAvatar {
+            transition: all 0.3s ease;
+        }
+
+        #steamAvatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px var(--faceit-orange);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-link, .platform-badge, .steam-status {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-links {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .profile-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .platform-badges {
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>
